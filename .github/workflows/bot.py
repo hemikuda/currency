@@ -1,60 +1,70 @@
 import os
 import json
 import requests
-from dotenv import load_dotenv
+from datetime import datetime
 from telegram import Bot
-from apscheduler.schedulers.blocking import BlockingScheduler
 
-# Load .env
-load_dotenv()
+# Получаем токены из переменных окружения (GitHub Secrets)
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
-CURRENCY = "USD"
 
-DATA_FILE = "data.json"
+# Источник курса валют — ЦБ РФ (USD к RUB)
 API_URL = "https://www.cbr-xml-daily.ru/daily_json.js"
+DATA_FILE = "data.json"
 
 bot = Bot(token=TELEGRAM_TOKEN)
-scheduler = BlockingScheduler()
 
-def load_data():
-    if os.path.exists(DATA_FILE):
+
+def get_current_rate():
+    try:
+        response = requests.get(API_URL, timeout=10)
+        data = response.json()
+        return round(data["Valute"]["USD"]["Value"], 2)
+    except Exception as e:
+        print("Ошибка при получении курса:", e)
+        return None
+
+
+def load_previous_rate():
+    if not os.path.exists(DATA_FILE):
+        return None
+    try:
         with open(DATA_FILE, "r") as f:
-            return json.load(f)
-    return {}
+            data = json.load(f)
+            return data.get("rate")
+    except Exception:
+        return None
 
-def save_data(data):
+
+def save_rate(rate):
     with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=2)
+        json.dump({"rate": rate, "timestamp": datetime.now().isoformat()}, f)
 
-def fetch_usd_rate():
-    response = requests.get(API_URL)
-    data = response.json()
-    return round(data["Valute"][CURRENCY]["Value"], 2)
 
-def check_rate():
-    data = load_data()
-    current_rate = fetch_usd_rate()
-    prev_rate = data.get(CURRENCY, {}).get("current", current_rate)
+def send_message(text):
+    bot.send_message(chat_id=CHAT_ID, text=text)
 
-    message = None
-    if current_rate > prev_rate:
-        message = f"\u2B06 USD вырос: {prev_rate} ➜ {current_rate}"
-    elif current_rate < prev_rate:
-        message = f"\u2B07 USD упал: {prev_rate} ➜ {current_rate}"
-    else:
-        message = f"USD не изменился: {current_rate}"
 
-    bot.send_message(chat_id=CHAT_ID, text=message)
+def main():
+    current_rate = get_current_rate()
+    if current_rate is None:
+        return
 
-    # Обновляем данные
-    data[CURRENCY] = {"previous": prev_rate, "current": current_rate}
-    save_data(data)
+    previous_rate = load_previous_rate()
 
-# Проверка каждый час
-scheduler.add_job(check_rate, "interval", hours=1)
+    message = f"💰 Курс USD: {current_rate} ₽"
+
+    if previous_rate is not None:
+        if current_rate > previous_rate:
+            message += "\n📈 Курс вырос 📈"
+        elif current_rate < previous_rate:
+            message += "\n📉 Курс упал 📉"
+        else:
+            message += "\n➖ Без изменений"
+
+    send_message(message)
+    save_rate(current_rate)
+
 
 if __name__ == "__main__":
-    print("Бот запущен...")
-    check_rate()
-    scheduler.start()
+    main()
