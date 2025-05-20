@@ -6,7 +6,8 @@ from telegram import Bot
 
 # Получаем токены из переменных окружения (GitHub Secrets)
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
+CHAT_ID = os.environ["CHAT_ID"]
+
 
 # Источник курса валют — ЦБ РФ (USD к RUB)
 API_URL = "https://www.cbr-xml-daily.ru/daily_json.js"
