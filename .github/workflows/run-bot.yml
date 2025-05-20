@@ -22,8 +22,9 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run bot
+        working-directory: ${{ github.workspace }}
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: |
-          python ./bot.py
+          python bot.py
