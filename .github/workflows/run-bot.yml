@@ -2,7 +2,7 @@ name: Run Currency Bot Every Hour
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Запуск каждый час
+    - cron: '0 * * * *'  # Каждый час
   workflow_dispatch:     # Возможность запускать вручную
 
 jobs:
@@ -29,11 +29,15 @@ jobs:
         run: |
           python bot.py
 
-      # 👉 ДОБАВЛЕНО: Коммит и пуш обновленного файла
       - name: Commit and push data.json
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+
           git add storage/data.json
           git commit -m "Update exchange rate data" || echo "No changes to commit"
-          git push
+
+          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}
+          git push origin HEAD:main
