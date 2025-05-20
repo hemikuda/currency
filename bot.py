@@ -14,15 +14,15 @@ bot = Bot(token=TELEGRAM_TOKEN)
 
 
 def get_current_rate():
+    url = "https://open.er-api.com/v6/latest/USD"
     try:
-        response = requests.get(API_URL, timeout=10)
+        response = requests.get(url, timeout=10)
         data = response.json()
-
-        if not data.get("success"):
+        if data.get("result") == "success":
+            return round(data["rates"]["KZT"], 2)
+        else:
             print("Ошибка API:", data)
             return None
-
-        return round(data["rates"]["KZT"], 2)
     except Exception as e:
         print("Ошибка при получении курса:", e)
         return None
