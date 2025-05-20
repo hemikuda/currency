@@ -39,5 +39,5 @@ jobs:
           git add storage/data.json
           git commit -m "Update exchange rate data" || echo "No changes to commit"
 
-          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/hemikuda/currency
+          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/hemikuda/currency
           git push origin HEAD:main
