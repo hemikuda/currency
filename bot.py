@@ -4,15 +4,11 @@ import requests
 from datetime import datetime
 from telegram import Bot
 
-# Получаем токены из переменных окружения (GitHub Secrets)
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-CHAT_ID = os.environ["CHAT_ID"]
+CHAT_ID = os.getenv("CHAT_ID")
 
-
-API_KEY = os.getenv("API_KEY")  # сохрани ключ в секретах GitHub и передавай в переменных окружения
-API_URL = f"https://api.exchangerate.host/latest?base=USD&symbols=KZT&access_key={API_KEY}"
+API_URL = "https://api.exchangerate.host/latest?base=USD&symbols=KZT"
 DATA_FILE = "storage/data.json"
-
 
 bot = Bot(token=TELEGRAM_TOKEN)
 
@@ -21,11 +17,12 @@ def get_current_rate():
     try:
         response = requests.get(API_URL, timeout=10)
         data = response.json()
-        if not data.get("success", False):
-            print("Ошибка API:", data.get("error", {}))
+
+        if not data.get("success"):
+            print("Ошибка API:", data)
             return None
-        rate = data["rates"]["KZT"]
-        return round(rate, 2)
+
+        return round(data["rates"]["KZT"], 2)
     except Exception as e:
         print("Ошибка при получении курса:", e)
         return None
@@ -43,6 +40,7 @@ def load_previous_rate():
 
 
 def save_rate(rate):
+    os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
     with open(DATA_FILE, "w") as f:
         json.dump({"rate": rate, "timestamp": datetime.now().isoformat()}, f)
 
@@ -58,7 +56,7 @@ def main():
 
     previous_rate = load_previous_rate()
 
-    message = f"💰 Курс USD: {current_rate} ₽"
+    message = f"💰 Курс USD → KZT: {current_rate} ₸"
 
     if previous_rate is not None:
         if current_rate > previous_rate:
