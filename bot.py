@@ -9,8 +9,8 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.environ["CHAT_ID"]
 
 
-# Источник курса валют — ЦБ РФ (USD к RUB)
-API_URL = "https://api.exchangerate.host/latest?base=USD&symbols=KZT"
+API_KEY = os.getenv("API_KEY")  # сохрани ключ в секретах GitHub и передавай в переменных окружения
+API_URL = f"https://api.exchangerate.host/latest?base=USD&symbols=KZT&access_key={API_KEY}"
 DATA_FILE = "storage/data.json"
 
 
@@ -21,7 +21,11 @@ def get_current_rate():
     try:
         response = requests.get(API_URL, timeout=10)
         data = response.json()
-        return round(data["rates"]["KZT"], 2)
+        if not data.get("success", False):
+            print("Ошибка API:", data.get("error", {}))
+            return None
+        rate = data["rates"]["KZT"]
+        return round(rate, 2)
     except Exception as e:
         print("Ошибка при получении курса:", e)
         return None
