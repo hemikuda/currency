@@ -10,7 +10,7 @@ CHAT_ID = os.environ["CHAT_ID"]
 
 
 # Источник курса валют — ЦБ РФ (USD к RUB)
-API_URL = "https://www.cbr-xml-daily.ru/daily_json.js"
+API_URL = "https://api.exchangerate.host/latest?base=USD&symbols=KZT"
 DATA_FILE = "storage/data.json"
 
 
@@ -21,7 +21,7 @@ def get_current_rate():
     try:
         response = requests.get(API_URL, timeout=10)
         data = response.json()
-        return round(data["Valute"]["USD"]["Value"], 2)
+        return round(data["rates"]["KZT"], 2)
     except Exception as e:
         print("Ошибка при получении курса:", e)
         return None
