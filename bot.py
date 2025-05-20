@@ -11,7 +11,8 @@ CHAT_ID = os.environ["CHAT_ID"]
 
 # Источник курса валют — ЦБ РФ (USD к RUB)
 API_URL = "https://www.cbr-xml-daily.ru/daily_json.js"
-DATA_FILE = "data.json"
+DATA_FILE = "storage/data.json"
+
 
 bot = Bot(token=TELEGRAM_TOKEN)
 
