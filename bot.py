@@ -69,5 +69,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-print(f"Sent message to {chat_id}")
