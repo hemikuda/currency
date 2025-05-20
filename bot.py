@@ -28,21 +28,59 @@ def get_current_rate():
         return None
 
 
+#def load_previous_rate():
+#    if not os.path.exists(DATA_FILE):
+ #       return None
+  #  try:
+   #     with open(DATA_FILE, "r") as f:
+    #        data = json.load(f)
+     #       return data.get("rate")
+    #except Exception:
+     #   return None
+
+
 def load_previous_rate():
     if not os.path.exists(DATA_FILE):
         return None
     try:
         with open(DATA_FILE, "r") as f:
             data = json.load(f)
-            return data.get("rate")
+            if isinstance(data, list) and data:
+                return data[-1].get("rate")
     except Exception:
         return None
 
 
+
+#def save_rate(rate):
+ #   os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
+  #  with open(DATA_FILE, "w") as f:
+   #     json.dump({"rate": rate, "timestamp": datetime.now().isoformat()}, f)
+
+
+
 def save_rate(rate):
-    os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
+    data = []
+
+    # Если файл уже есть, загружаем старые данные
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, "r") as f:
+                data = json.load(f)
+        except Exception:
+            data = []
+
+    # Добавляем новую запись
+    data.append({
+        "rate": rate,
+        "timestamp": datetime.now().isoformat()
+    })
+
+    # Сохраняем обратно
     with open(DATA_FILE, "w") as f:
-        json.dump({"rate": rate, "timestamp": datetime.now().isoformat()}, f)
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
 
 
 def send_message(text):
