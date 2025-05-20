@@ -5,6 +5,9 @@ on:
     - cron: '0 * * * *'  # Каждый час
   workflow_dispatch:     # Возможность запускать вручную
 
+permissions:
+  contents: write
+
 jobs:
   run-bot:
     runs-on: ubuntu-latest
