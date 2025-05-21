@@ -2,7 +2,7 @@ name: Run Currency Bot Every Hour
 
 on:
   schedule:
-    - cron: '0 */12 * * *'  # Каждый час
+    - cron: '0 */6 * * *'  # Каждый час
   workflow_dispatch:     # Возможность запускать вручную
 
 permissions:
